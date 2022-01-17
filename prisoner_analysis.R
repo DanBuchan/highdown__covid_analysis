@@ -44,6 +44,8 @@ staff_experience_data$email <- NULL
 # Prisoner outcomes/symptoms/response vars: NAs become 2, blanks become NA
 # For staff all variables and responses are binary so NAs remain as is.
 prisoner_experience_data[,20:35][is.na(prisoner_experience_data[,20:35])] <- 2
+prisoner_experience_data[,36:41][prisoner_experience_data[,36:41]=='']<-"0"
+
 
 # Now cast variables to the right types
 prisoner_experience_data$ETHNICITY <- as.factor(prisoner_experience_data$ETHNICITY)
@@ -55,13 +57,13 @@ staff_experience_data$ETHNICITY <- as.factor(staff_experience_data$ETHNICITY)
 staff_complete_subset <- na.omit(staff_experience_data)
 colnames(staff_complete_subset)<-c("ID", "AGE","ETHNICITY", "Length_of_service", "JOB","Catching_covid", "Infecting_FF", "Worry_prisoners", "Feeling_frustrated", "Coping_changes", "Worry_colleagues", "Coping_staff_shortages", "LOW_MOOD", "ANXIETY", "WORRY", "FRUSTRATION", "SLEEP", "APPETITE", "DRINKING", "SMOKING", "Support_FF", "Support_Managers,", "Support_Colleagues", "Exercise", "Hobbies") 
 #cor(staff_complete_subset[,6:21])
-staff_correlation <- rcorr(as.matrix(staff_complete_subset[,6:21]))
+staff_correlation <- rcorr(as.matrix(staff_complete_subset[,6:25]))
 corrplot(staff_correlation$r, p.mat = staff_correlation$P, sig.level = c(.001, .01, .05), insig="label_sig", pch.cex = 1.5, method='number', type="upper", number.cex=0.70, tl.col="black", tl.cex = 0.5, is.corr = FALSE, col="black", cl.pos="n")
 
 prisoner_complete_subset <- na.omit(prisoner_experience_data)
 colnames(prisoner_complete_subset)<-c("NUMBER", "AGE", "ETHNICITY", "ARRIVAL", "FIRST_TIME", "Court_changes", "More_time_in_cell", "Less_showers", "Cancelled_visits", "Less_staff", "No_education", "Less_work", "Less_MH_support", "Less_PH_support", "Changes_in_mealtimes", "More_time_cell_mates", "Changes_in_timetable", "Less_gym", "Difficult_busy_in_cell", "LOW_MOOD", "ANXIOUS", "SCARED", "WORRY", "V_AND_V", "SLEEP", "EATING", "DRUGS", "UPSETTING_THOUGHTS", "UPSETTING_MEMORIES", "NIGHTMARES", "FRUSTRATION_ANGER", "ARGUMENTS", "DSH", "SUICIDAL_THOUGHTS", "FEELING_SAFE", "Worried_covid_in_prison", "Worried_covid_in_community", "Worried_housing_on_release", "Worried_probation_on_release", "Worried_MH_on_release","Worried_PH_on_release")
 # cor(prisoner_complete_subset[,6:35])
-prisoner_correlation <- rcorr(as.matrix(prisoner_complete_subset[,6:35]))
+prisoner_correlation <- rcorr(as.matrix(prisoner_complete_subset[,c(6:41)]))
 par(xpd = TRUE)
 corrplot(prisoner_correlation$r, p.mat = prisoner_correlation$P, sig.level = c(.001, .01, .05), insig="label_sig", pch.cex = 1.5, method='number', type="upper", number.cex=0.50, tl.col="black", tl.cex = 0.5, is.corr = FALSE, col="black", cl.pos="n", mar = c(1, 1, 1, 1))
 corrplot(prisoner_correlation$r, p.mat = prisoner_correlation$P, sig.level = .05, insig="blank", method='number', type="upper", number.cex=0.45, tl.col="black", tl.cex = 0.5, is.corr = FALSE, col="black", cl.pos="n", mar = c(1, 1, 1, 1))
@@ -72,12 +74,15 @@ write.table(format(staff_correlation$r, digits=1), file="/Users/dbuchan/Projects
 write.table(format(staff_correlation$P, scientific=F), file="/Users/dbuchan/Projects/prison_analysis/staff_corr_pvalues.csv", sep=",")
 
 # look at the bias of the answers
-sapply(prisoner_complete_subset[,6:19], function(x) table(factor(x, levels=c(0,1), ordered=TRUE)))
-sapply(prisoner_complete_subset[,20:35], function(x) table(factor(x, levels=c(1,2,3), ordered=TRUE)))
-sapply(prisoner_complete_subset[,36:41], function(x) table(factor(x, levels=c(0,1), ordered=TRUE)))
+prisoner_predictor_freq<-sapply(prisoner_complete_subset[,c(6:19,36:41)], function(x) table(factor(x, levels=c(0,1), ordered=TRUE)))
+prisoner_outcome_freq<-sapply(prisoner_complete_subset[,20:35], function(x) table(factor(x, levels=c(1,2,3), ordered=TRUE)))
 
-sapply(staff_complete_subset[,6:12], function(x) table(factor(x, levels=c(0,1), ordered=TRUE)))
-sapply(staff_complete_subset[,13:25], function(x) table(factor(x, levels=c(0,1), ordered=TRUE)))
+staff_predictor_freq<-sapply(staff_complete_subset[,c(6:12,21:25)], function(x) table(factor(x, levels=c(0,1), ordered=TRUE)))
+staff_outcome_freq<-sapply(staff_complete_subset[,13:20], function(x) table(factor(x, levels=c(0,1), ordered=TRUE)))
+write.table(prisoner_predictor_freq, file="/Users/dbuchan/Projects/prison_analysis/prisoner_predictor_freq.csv", sep=",")
+write.table(prisoner_outcome_freq, file="/Users/dbuchan/Projects/prison_analysis/prisoner_outcome_freq.csv", sep=",")
+write.table(staff_predictor_freq, file="/Users/dbuchan/Projects/prison_analysis/staff_pedictor_freq.csv", sep=",")
+write.table(staff_outcome_freq, file="/Users/dbuchan/Projects/prison_analysis/staff_outcome_frew.csv", sep=",")
 
 # Now we're happy send everything to factors
 prisoner_complete_subset[,c(5:19,36:41)] <- lapply(prisoner_complete_subset[,c(5:19,36:41)],as.factor)
