@@ -64,7 +64,12 @@ colnames(prisoner_complete_subset)<-c("NUMBER", "AGE", "ETHNICITY", "ARRIVAL", "
 prisoner_correlation <- rcorr(as.matrix(prisoner_complete_subset[,6:35]))
 par(xpd = TRUE)
 corrplot(prisoner_correlation$r, p.mat = prisoner_correlation$P, sig.level = c(.001, .01, .05), insig="label_sig", pch.cex = 1.5, method='number', type="upper", number.cex=0.50, tl.col="black", tl.cex = 0.5, is.corr = FALSE, col="black", cl.pos="n", mar = c(1, 1, 1, 1))
-corrplot(prisoner_correlation$r, p.mat = prisoner_correlation$P, sig.level = .05, insig="blank", method='number', type="upper", number.cex=0.50, tl.col="black", tl.cex = 0.5, is.corr = FALSE, col="black", cl.pos="n", mar = c(1, 1, 1, 1))
+corrplot(prisoner_correlation$r, p.mat = prisoner_correlation$P, sig.level = .05, insig="blank", method='number', type="upper", number.cex=0.45, tl.col="black", tl.cex = 0.5, is.corr = FALSE, col="black", cl.pos="n", mar = c(1, 1, 1, 1))
+
+write.table(format(prisoner_correlation$r, digits=1), file="/Users/dbuchan/Projects/prison_analysis/prisoner_correlations.csv", sep=",")
+write.table(format(prisoner_correlation$P, scientific=F), file="/Users/dbuchan/Projects/prison_analysis/prisoner_corr_pvalues.csv", sep=",")
+write.table(format(staff_correlation$r, digits=1), file="/Users/dbuchan/Projects/prison_analysis/staff_correlations.csv", sep=",")
+write.table(format(staff_correlation$P, scientific=F), file="/Users/dbuchan/Projects/prison_analysis/staff_corr_pvalues.csv", sep=",")
 
 # look at the bias of the answers
 sapply(prisoner_complete_subset[,6:19], function(x) table(factor(x, levels=c(0,1), ordered=TRUE)))
